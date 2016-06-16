@@ -14,25 +14,30 @@ def main():
     metastack.push(fithtypes.Stack())
     metastack._locals.update(Fith_primitives)
     metastack._locals.update(strings)
-    metastack._locals.update(json.load(open("lib/listing.json")))
-    metastack.peek().push("lib/builtins.5th")
-    Fith_load(metastack)
+    keys, values = zip(*json.load(open("lib/listing.json")).items())
+    values = [fithtypes.FithVar(value) for value in values]
+    metastack._locals.update(zip(keys, values))
+    FithExec(metastack, ["*builtins*", "load"])
     FithExec(metastack, words)
 
 def FithExec(metastack, words):
     words = iter(words)
     try:
+        lambda_counter = 0
         while True:
             stack = metastack.peek()
             word = next(words)
-
             if word == '}' and isinstance(stack, fithtypes.FithFunc):
-                Fith_close_lambda(metastack)
+                if lambda_counter > 0:
+                    lambda_counter -= 1
+                else:
+                    Fith_close_lambda(metastack)
             elif word == ';' and isinstance(stack, fithtypes.NamedFunc):
                 Fith_close_def(metastack)
             elif word == ']' and isinstance(stack, fithtypes.FithList):
                 Fith_close_list(metastack)
             elif not metastack.is_live:
+                if word == '{': lambda_counter += 1
                 stack.push(word)
             else:
                 try:
@@ -71,6 +76,7 @@ def Fith_load(metastack, _=None):
             words, strings = parse.parse(file.read())
     except FileNotFoundError:
         print("Error: could not find file {path}".format(path=path))
+        sys.exit()
     metastack._locals.update(strings)
     FithExec(metastack, words)
 
@@ -80,7 +86,6 @@ def Fith_run(metastack, _=None):
 
 @metaword('if')
 def Fith_if(metastack, _=None):
-    print(metastack._list)
     func = metastack.pop_from_top()
     cond = metastack.pop_from_top()
     if cond:

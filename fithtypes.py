@@ -34,6 +34,9 @@ class Stack:
     def __len__(self):
         return len(self._list)
 
+    def __getitem__(self, item):
+        return self._list[item]
+
 class FithList(Stack):
     def __repr__(self):
         return ' '.join(['['] + [str(item) for item in self._list] + [']'])

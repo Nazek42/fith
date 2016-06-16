@@ -67,6 +67,10 @@ def Fith_slice(stack):
     L = stack.peek()._list
     L[:] = [L[i] for i in range(*slice(*sl).indices(len(L)))]
 
+def Fith_dump(stack):
+    L = stack.pop()
+    stack._list += L
+
 def Fith_dup(stack):
     stack.push(stack.peek())
 
@@ -172,6 +176,7 @@ Fith_primitives = {
     'append': Fith_append,
     'prepend': Fith_prepend,
     'slice': Fith_slice,
+    'dump': Fith_dump,
     'dup': Fith_dup,
     'drop': Fith_drop,
     'swap': Fith_swap,

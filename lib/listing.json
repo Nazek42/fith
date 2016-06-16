@@ -1,5 +1,5 @@
 {
-    "*math*": "math.5th",
-    "*builtins*": "builtins.5th",
-    "*functional*": "functional.5th"
+    "*math*": "lib/math.5th",
+    "*builtins*": "lib/builtins.5th",
+    "*functional*": "lib/functional.5th"
 }

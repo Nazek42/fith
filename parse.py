@@ -1,5 +1,6 @@
 import re
 import itertools
+import fithtypes
 
 def parse(raw, name=''):
     raw = re.split(r'"(.*?)"', raw.strip())
@@ -10,15 +11,9 @@ def parse(raw, name=''):
     for i in range(offset, len(raw), 2):
         placeholder = '\x02' + name + str(i)
         string = parse_escapes(raw[i])
-        strings[placeholder] = StringConstant(string)
+        strings[placeholder] = fithtypes.FithVar(string)
         raw[i] = placeholder
     return itertools.chain.from_iterable(s.split() for s in raw), strings
-
-class StringConstant:
-    def __init__(self, string):
-        self._value = string
-    def __call__(self, stack):
-        stack.push(self._value)
 
 def parse_escapes(string):
     escapes = {
