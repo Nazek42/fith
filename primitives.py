@@ -1,5 +1,6 @@
 import sys
 import functools
+import math
 import fithtypes # FithList, FithVar, FithFunc, NamedFunc, FithBool, FithNull
 
 def Fith_add(stack):
@@ -22,10 +23,38 @@ def Fith_div(stack):
     a = stack.pop()
     stack.push(a / b)
 
+def Fith_floordiv(stack):
+    b = stack.pop()
+    a = stack.pop()
+    stack.push(a // b)
+
 def Fith_mod(stack):
     b = stack.pop()
     a = stack.pop()
     stack.push(a % b)
+
+def Fith_pow(stack):
+    b = stack.pop()
+    a = stack.pop()
+    stack.push(pow(a, b))
+
+def Fith_powmod(stack):
+    m = stack.pop()
+    b = stack.pop()
+    a = stack.pop()
+    stack.push(pow(a, b, m))
+
+def Fith_floor(stack):
+    x = stack.pop()
+    stack.push(math.floor(x))
+
+def Fith_ceil(stack):
+    x = stack.pop()
+    stack.push(math.ceil(x))
+
+def Fith_sqrt(stack):
+    x = stack.pop()
+    stack.push(math.sqrt(x))
 
 def Fith_print(stack):
     print(stack.pop())
@@ -48,6 +77,16 @@ def Fith_cmp(stack):
 
 def Fith_not(stack):
     stack.push(not stack.pop())
+
+def Fith_and(stack):
+    b = stack.pop()
+    a = stack.pop()
+    stack.push(a and b)
+
+def Fith_or(stack):
+    b = stack.pop()
+    a = stack.pop()
+    stack.push(a or b)
 
 def Fith_get(stack):
     i = stack.pop()
@@ -166,12 +205,20 @@ Fith_primitives = {
     '-': Fith_sub,
     '*': Fith_mul,
     '/': Fith_div,
-    '%': Fith_mod,
+    '/_': Fith_floordiv,
+    'mod': Fith_mod,
+    'pow': Fith_pow,
+    'powmod': Fith_powmod,
+    'floor': Fith_floor,
+    'ceil': Fith_ceil,
+    'sqrt': Fith_sqrt,
     '.': Fith_print,
     '.s': Fith_dump_stack,
     'len': Fith_len,
     'cmp': Fith_cmp,
     'not': Fith_not,
+    'and': Fith_and,
+    'or': Fith_or,
     '@': Fith_get,
     'append': Fith_append,
     'prepend': Fith_prepend,

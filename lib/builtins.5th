@@ -11,6 +11,11 @@
 
 : >bool ( a -- bool ) not not ;
 
+: inc ( x -- x+1 ) 1 + ;
+: dec ( x -- x-1 ) 1 - ;
+: inc2 ( x -- x+2 ) 2 + ;
+: dec2 ( x -- x-2 ) 2 - ;
+
 : map ( list transformation -- transformed-list )
     [ ] -> %mapresult%
     over len -> %length%
@@ -45,9 +50,25 @@
     } while
 ;
 
-
 : foldr ( [x1,x2,x3...xn] func -- folded )
     -> func
     dup len 1 - -> num
     dump func num dotimes
 ;
+
+: range ( a b -- [a,a+1...b-2,b-1] )
+    -> %b% -> %a%
+    [ ]
+    %a% %b% <? {
+        %a% append
+        %a% inc -> %a%
+        %a% %b% <?
+    } while
+;
+
+: sum ( [x1,x2..xn] -- x1+x2+..+xn ) { + } foldr ;
+: product ( [x1,x2..xn] -- x1*x2*..*xn ) { * } foldr ;
+
+: []>bool ( [x1,x2..xn] -- [x1>bool,f2>bool..fn>bool] ) { >bool } map ;
+: all ( [f1,f2..fn] -- f1&&f2&&..&&fn ) []>bool { and } foldr ;
+: any ( [f1,f2..fn] -- f1||f2||..||fn ) []>bool { or } foldr ;

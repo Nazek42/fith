@@ -89,7 +89,7 @@ def Fith_if(metastack, _=None):
     func = metastack.pop_from_top()
     cond = metastack.pop_from_top()
     if cond:
-        stack.push(func)
+        metastack.push_to_top(func)
         Fith_run(metastack)
 
 @metaword('branch')
@@ -97,7 +97,7 @@ def Fith_branch(metastack, _=None):
     iffalse = metastack.pop_from_top()
     iftrue = metastack.pop_from_top()
     cond = metastack.pop_from_top()
-    stack.push(iftrue if cond else iffalse)
+    metastack.push_to_top(iftrue if cond else iffalse)
     Fith_run(metastack)
 
 @metaword('while')
