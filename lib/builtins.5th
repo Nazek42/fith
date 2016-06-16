@@ -1,0 +1,38 @@
+: -rot ( a b c -- c a b ) rot rot ;
+: nip ( a b -- b ) swap drop ;
+: tuck ( a b -- b a b ) swap over ;
+
+: =? ( a b -- a=b ) cmp not ;
+: >? ( a b -- a>b ) cmp 1 =? ;
+: <? ( a b -- a<b ) cmp -1 =? ;
+: >=? ( a b -- a>=b ) <? not ;
+: <=? ( a b -- a<=b ) >? not ;
+: !=? ( a b -- a!=b ) =? not ;
+
+: >bool ( a -- bool ) not not ;
+
+: map ( list transformation -- transformed-list )
+    [ ] -> %mapresult%
+    over len -> %length%
+    0 -> %i%
+    %i% %length% <? {
+        over %i% @ over ~
+        %mapresult% swap append drop
+        %i% 1 + -> %i%
+        %i% %length% <?
+    } while
+    drop drop %mapresult%
+;
+
+: for ( list block -- )
+    over len -> %length%
+    0 -> %i%
+    %i% %length% <? {
+        over %i% @ over ~
+        %i% 1 + -> %i%
+        %i% %length% <?
+    } while
+    drop drop
+;
+
+": filter ( list predicate -- filtered-list )" drop

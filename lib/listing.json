@@ -1,0 +1,5 @@
+{
+    "*math*": "math.5th",
+    "*builtins*": "builtins.5th",
+    "*functional*": "functional.5th"
+}

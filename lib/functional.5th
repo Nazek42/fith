@@ -1,0 +1,12 @@
+: fix ( func -- recursive-func )
+    { dup "recurse" =? { drop "%recurse%" } if } map
+    ' { prepend
+    ' -> prepend
+    ' %recurse% prepend
+    ' } append
+    Y-combinator
+}
+
+: Y-combinator ( anon-func -- recursive-func )
+    -> f { -> x { f Y-combinator x } } f
+;
