@@ -59,6 +59,9 @@ def Fith_sqrt(stack):
 def Fith_print(stack):
     print(stack.pop())
 
+def Fith_literal_print(stack):
+    print(stack.pop(), end='')
+
 def Fith_dump_stack(stack):
     print(stack._list)
 
@@ -156,6 +159,17 @@ def Fith_transform(stack):
     for metavar in after:
         stack.push(names[metavar])
 
+def Fith_line(stack):
+    stack.push(input())
+
+def Fith_read(stack):
+    stack.push(sys.stdin.read())
+
+def Fith_castgen(cast):
+    def castfunc(stack):
+        stack._list[-1] = cast(stack.peek())
+    return castfunc
+
 def Fith_open_def(metastack, words):
     name = next(words)
     if next(words) != '(':
@@ -213,6 +227,7 @@ Fith_primitives = {
     'ceil': Fith_ceil,
     'sqrt': Fith_sqrt,
     '.': Fith_print,
+    '\.': Fith_literal_print,
     '.s': Fith_dump_stack,
     'len': Fith_len,
     'cmp': Fith_cmp,
@@ -233,6 +248,10 @@ Fith_primitives = {
     #'nip': Fith_nip,
     #'tuck': Fith_tuck,
     'transform': Fith_transform,
+    'line': Fith_line,
+    'read': Fith_read,
+    '>int': Fith_castgen(int),
+    '>float': Fith_castgen(float),
     '#t':fithtypes.FithBool(True),
     '#f':fithtypes.FithBool(False),
     '#null': fithtypes.FithNull,

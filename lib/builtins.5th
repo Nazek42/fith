@@ -72,3 +72,5 @@
 : []>bool ( [x1,x2..xn] -- [x1>bool,f2>bool..fn>bool] ) { >bool } map ;
 : all ( [f1,f2..fn] -- f1&&f2&&..&&fn ) []>bool { and } foldr ;
 : any ( [f1,f2..fn] -- f1||f2||..||fn ) []>bool { or } foldr ;
+
+: prompt ( prompt-str -- input ) \. line ;
