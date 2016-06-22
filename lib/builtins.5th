@@ -11,10 +11,10 @@
 
 : >bool ( a -- bool ) not not ;
 
-: inc ( x -- x+1 ) 1 + ;
-: dec ( x -- x-1 ) 1 - ;
-: inc2 ( x -- x+2 ) 2 + ;
-: dec2 ( x -- x-2 ) 2 - ;
+: 1+ ( x -- x+1 ) 1 + ;
+: 1- ( x -- x-1 ) 1 - ;
+: 2+ ( x -- x+2 ) 2 + ;
+: 2- ( x -- x-2 ) 2 - ;
 
 : map ( list transformation -- transformed-list )
     [ ] -> %mapresult%
@@ -23,7 +23,7 @@
     %i% %length% <? {
         over %i% @ over ~
         %mapresult% swap append drop
-        %i% 1 + -> %i%
+        %i% 1+ -> %i%
         %i% %length% <?
     } while
     drop drop %mapresult%
@@ -34,7 +34,7 @@
     0 -> %i%
     %i% %length% <? {
         over %i% @ over ~
-        %i% 1 + -> %i%
+        %i% 1+ -> %i%
         %i% %length% <?
     } while
     drop drop
@@ -45,7 +45,7 @@
     -> %dtfunc%
     %i% %dotimes% <? {
         %dtfunc% ~
-        %i% 1 + -> %i%
+        %i% 1+ -> %i%
         %i% %dotimes% <?
     } while
 ;
@@ -56,15 +56,22 @@
     dump func num dotimes
 ;
 
+: filter ( list pred -- filtered )
+
+;
+
 : range ( a b -- [a,a+1...b-2,b-1] )
     -> %b% -> %a%
     [ ]
     %a% %b% <? {
         %a% append
-        %a% inc -> %a%
+        %a% 1+ -> %a%
         %a% %b% <?
     } while
 ;
+
+: exc-range ( a b -- [a+1,a+2...b-2,b-1] ) swap 1+ swap range ;
+: inc-range ( a b -- [a,a+1...b-1,b] ) 1+ range ;
 
 : sum ( [x1,x2..xn] -- x1+x2+..+xn ) { + } foldr ;
 : product ( [x1,x2..xn] -- x1*x2*..*xn ) { * } foldr ;

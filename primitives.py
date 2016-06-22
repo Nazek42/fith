@@ -28,6 +28,9 @@ def Fith_floordiv(stack):
     a = stack.pop()
     stack.push(a // b)
 
+def Fith_abs(stack):
+    stack.push(abs(stack.pop()))
+
 def Fith_mod(stack):
     b = stack.pop()
     a = stack.pop()
@@ -71,6 +74,8 @@ def Fith_len(stack):
 def Fith_cmp(stack):
     b = stack.pop()
     a = stack.pop()
+    #print("a:",a)
+    #print("b:",b)
     if a < b:
         stack.push(-1)
     elif a > b:
@@ -208,6 +213,9 @@ def Fith_quote(metastack, words):
 def Fith_set_var(metastack, words):
     metastack.setvar(next(words), fithtypes.FithVar(metastack.pop_from_top()))
 
+def Fith_register(metastack, words):
+    metastack.setvar(next(words), metastack.pop_from_top())
+
 def Fith_open_list(metastack, _=None):
     metastack.push(fithtypes.FithList())
 
@@ -220,6 +228,7 @@ Fith_primitives = {
     '*': Fith_mul,
     '/': Fith_div,
     '/_': Fith_floordiv,
+    'abs': Fith_abs,
     'mod': Fith_mod,
     'pow': Fith_pow,
     'powmod': Fith_powmod,
@@ -263,6 +272,7 @@ Fith_metawords = {
     '[': Fith_open_list,
     "'": Fith_quote,
     '->': Fith_set_var,
+    '::': Fith_register,
 }
 
 class metaword:

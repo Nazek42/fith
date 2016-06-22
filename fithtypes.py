@@ -37,6 +37,9 @@ class Stack:
     def __getitem__(self, item):
         return self._list[item]
 
+    def __repr__(self):
+        return str(self._list)
+
 class FithList(Stack):
     def __repr__(self):
         return ' '.join(['['] + [str(item) for item in self._list] + [']'])
@@ -49,11 +52,13 @@ class Metastack(Stack):
         return not isinstance(self.peek(), (FithFunc, NamedFunc))
 
     def cons(self):
-        self._list[-2].push(self.pop())
+        func = self.pop()
+        #print("Just cons'd, func:", func._list)
+        self._list[-1].push(func)
 
     def compile(self):
         func = self.pop()
-        self.peek().setvar(func.name, func)
+        self.setvar(func.name, func)
 
     def getvar(self, name):
         for stack in self._list:

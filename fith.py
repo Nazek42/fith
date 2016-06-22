@@ -27,7 +27,9 @@ def FithExec(metastack, words):
         while True:
             stack = metastack.peek()
             word = next(words)
+            #print("word:",word,"lambda_counter:",lambda_counter)
             if word == '}' and isinstance(stack, fithtypes.FithFunc):
+                #print("Encountered }, lambda_counter:",lambda_counter)
                 if lambda_counter > 0:
                     lambda_counter -= 1
                 else:
@@ -40,13 +42,13 @@ def FithExec(metastack, words):
                 if word == '{': lambda_counter += 1
                 stack.push(word)
             else:
+                #print("Live word:", word)
                 try:
                     stack.push(int(word))
                     continue
                 except ValueError:
                     try:
                         stack.push(float(word))
-
                         continue
                     except ValueError:
                         pass
@@ -54,7 +56,9 @@ def FithExec(metastack, words):
                     Fith_metawords[word](metastack, words)
                 else:
                     transform = metastack.getvar(word)
+                    #print("Encountered function: (",word,',',transform._list,')')
                     if isinstance(transform, (fithtypes.FithFunc, fithtypes.NamedFunc)):
+                        #print("Encountered function: (",word,',',transform._list,')')
                         FithExec(metastack, transform._list)
                     else:
                         transform(stack)
@@ -82,7 +86,9 @@ def Fith_load(metastack, _=None):
 
 @metaword('~')
 def Fith_run(metastack, _=None):
-    FithExec(metastack, metastack.pop_from_top()._list)
+    func = metastack.pop_from_top()
+    #print("Running function:", func._list)
+    FithExec(metastack, func._list)
 
 @metaword('if')
 def Fith_if(metastack, _=None):
