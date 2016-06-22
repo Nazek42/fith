@@ -1,4 +1,4 @@
-: factorial ( x -- x! ) 2 swap inc range product ;
+: factorial ( x -- x! ) 2 swap inc-range product ;
 
 : prime? ( x -- prime-or-not ) -> x
     2 x sqrt ceil inc-range
