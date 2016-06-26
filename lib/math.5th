@@ -5,7 +5,7 @@
     { x swap mod } map all
 ;
 
-: gcd ( a b -- gcd(a,b) ) dup { tuck mod dup } while drop abs ;
+: gcd ( a b -- gcd(a,b) ) { dup } { tuck mod } while drop abs ;
 
 : totient ( x -- phi(x) ) -> x
     1 x inc-range

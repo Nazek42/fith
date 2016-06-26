@@ -58,7 +58,7 @@ class Metastack(Stack):
 
     def compile(self):
         func = self.pop()
-        self.setvar(func.name, func)
+        self.peek().setvar(func.name, func)
 
     def getvar(self, name):
         for stack in self._list:

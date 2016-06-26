@@ -92,28 +92,48 @@ def Fith_run(metastack, _=None):
 
 @metaword('if')
 def Fith_if(metastack, _=None):
-    func = metastack.pop_from_top()
-    cond = metastack.pop_from_top()
+    stack = metastack.peek()
+    func = stack.pop()
+    cond = stack.pop()
     if cond:
-        metastack.push_to_top(func)
+        stack.push(func)
         Fith_run(metastack)
 
 @metaword('branch')
 def Fith_branch(metastack, _=None):
-    iffalse = metastack.pop_from_top()
-    iftrue = metastack.pop_from_top()
-    cond = metastack.pop_from_top()
-    metastack.push_to_top(iftrue if cond else iffalse)
+    stack = metastack.peek()
+    iffalse = stack.pop()
+    iftrue = stack.pop()
+    cond = stack.pop()
+    stack.push(iftrue if cond else iffalse)
     Fith_run(metastack)
 
 @metaword('while')
 def Fith_while(metastack, _=None):
-    body = metastack.pop_from_top()
-    cond = metastack.pop_from_top()
-    while cond:
-        metastack.push_to_top(body)
+    stack = metastack.peek()
+    body = stack.pop()
+    cond = stack.pop()
+    stack.push(cond)
+    Fith_run(metastack)
+    while stack.pop():
+        stack.push(body)
         Fith_run(metastack)
-        cond = metastack.pop_from_top()
+        stack.push(cond)
+        Fith_run(metastack)
+
+@metaword('filter')
+def Fith_filter(metastack, _=None):
+    stack = metastack.peek()
+    func = stack.pop()
+    lst = stack.peek()
+    lst._list[:] = [thing for thing in lst._list if check(metastack, func, thing)]
+
+def check(metastack, func, thing):
+    stack = metastack.peek()
+    stack.push(thing)
+    stack.push(func)
+    Fith_run(metastack)
+    return metastack.peek().pop()
 
 if __name__ == '__main__':
     main()

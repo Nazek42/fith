@@ -3,6 +3,7 @@ import itertools
 import fithtypes
 
 def parse(raw, name=''):
+    raw = remove_comments(raw)
     raw = re.split(r'"(.*?)"', raw.strip())
     offset = 1 if raw[0] else 0
     if not raw[0]: raw.pop(0)
@@ -32,7 +33,7 @@ def parse_escapes(string):
         char = string[pointer]
         if char == '\\':
             try:
-                esc = string[pointer+1]
+                esc = string[pointer + 1]
             except IndexError:
                 print("Error: Incomplete backslash escape in string literal \"{string}\"".format(string=string))
                 sys.exit()
@@ -55,3 +56,7 @@ def parse_escapes(string):
             final.append(char)
             pointer += 1
     return ''.join(final)
+
+def remove_comments(code):
+    no_comments = re.sub(r"##.*$", ' ', code, flags=re.MULTILINE)
+    return re.sub(r" {2,}", ' ', no_comments.replace('\n', ' '))

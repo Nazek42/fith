@@ -1,105 +1,48 @@
 import sys
 import functools
 import math
+import operator
 import fithtypes # FithList, FithVar, FithFunc, NamedFunc, FithBool, FithNull
 
-def Fith_add(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(a + b)
-
-def Fith_sub(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(a - b)
-
-def Fith_mul(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(a * b)
-
-def Fith_div(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(a / b)
-
-def Fith_floordiv(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(a // b)
-
-def Fith_abs(stack):
-    stack.push(abs(stack.pop()))
-
-def Fith_mod(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(a % b)
-
-def Fith_pow(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(pow(a, b))
-
-def Fith_powmod(stack):
-    m = stack.pop()
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(pow(a, b, m))
-
-def Fith_floor(stack):
-    x = stack.pop()
-    stack.push(math.floor(x))
-
-def Fith_ceil(stack):
-    x = stack.pop()
-    stack.push(math.ceil(x))
-
-def Fith_sqrt(stack):
-    x = stack.pop()
-    stack.push(math.sqrt(x))
-
-def Fith_print(stack):
-    print(stack.pop())
-
-def Fith_literal_print(stack):
-    print(stack.pop(), end='')
+class word:
+    def __init__(self, arity):
+        self.arity = arity
+    def __call__(self, func):
+        arity = self.arity
+        @functools.wraps(func)
+        def wrapper(stack):
+            args = []
+            for _ in range(arity):
+                args.append(stack.pop())
+            result = func(*args[::-1])
+            if result is not None:
+                stack.push(result)
+        return wrapper
 
 def Fith_dump_stack(stack):
     print(stack._list)
 
-def Fith_len(stack):
-    stack.push(len(stack.pop()))
+@word(1)
+def Fith_len(L):
+    return len(L._list)
 
-def Fith_cmp(stack):
-    b = stack.pop()
-    a = stack.pop()
-    #print("a:",a)
-    #print("b:",b)
+@word(2)
+def Fith_cmp(a, b):
     if a < b:
-        stack.push(-1)
+        return -1
     elif a > b:
-        stack.push(1)
+        return 1
     else:
-        stack.push(0)
+        return 0
 
-def Fith_not(stack):
-    stack.push(not stack.pop())
+@word(2)
+def Fith_get(L, i):
+    return L[i]
 
-def Fith_and(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(a and b)
-
-def Fith_or(stack):
-    b = stack.pop()
-    a = stack.pop()
-    stack.push(a or b)
-
-def Fith_get(stack):
+def Fith_set(stack):
+    x = stack.pop()
     i = stack.pop()
-    L = stack.pop()
-    stack.push(L[i])
+    stack.peek()._list[i] = x
 
 def Fith_append(stack):
     item = stack.pop()
@@ -109,8 +52,12 @@ def Fith_prepend(stack):
     item = stack.pop()
     stack.peek()._list.insert(0, item)
 
+def Fith_del(stack):
+    index = stack.pop()
+    stack.peek()._list.pop(index)
+
 def Fith_slice(stack):
-    sl = [i if isinstance(i, int) else None for i in stack.pop()]
+    sl = [i if isinstance(i, int) else None for i in stack.pop()._list]
     L = stack.peek()._list
     L[:] = [L[i] for i in range(*slice(*sl).indices(len(L)))]
 
@@ -139,7 +86,7 @@ def Fith_over(stack):
 def Fith_rot(stack):
     c = stack.pop()
     b = stack.pop()
-    a = stack.peek()
+    a = stack.pop()
     stack.push(b)
     stack.push(c)
     stack.push(a)
@@ -174,6 +121,21 @@ def Fith_castgen(cast):
     def castfunc(stack):
         stack._list[-1] = cast(stack.peek())
     return castfunc
+
+@word(1)
+def Fith_cast_list(thing):
+    newlist = fithtypes.FithList()
+    try:
+        newlist._list = list(thing)
+    except TypeError:
+        newlist._list = [thing]
+    return newlist
+
+def Fith_typecheckgen(T):
+    @word(1)
+    def typechecker(thing):
+        return isinstance(thing, T)
+    return typechecker
 
 def Fith_open_def(metastack, words):
     name = next(words)
@@ -223,27 +185,31 @@ def Fith_close_list(metastack, _=None):
     metastack.cons()
 
 Fith_primitives = {
-    '+': Fith_add,
-    '-': Fith_sub,
-    '*': Fith_mul,
-    '/': Fith_div,
-    '/_': Fith_floordiv,
-    'abs': Fith_abs,
-    'mod': Fith_mod,
-    'pow': Fith_pow,
-    'powmod': Fith_powmod,
-    'floor': Fith_floor,
-    'ceil': Fith_ceil,
-    'sqrt': Fith_sqrt,
-    '.': Fith_print,
-    '\.': Fith_literal_print,
+    '+': word(2)(operator.add),
+    '-': word(2)(operator.sub),
+    '*': word(2)(operator.mul),
+    '/': word(2)(operator.truediv),
+    '/_': word(2)(operator.floordiv),
+    'abs': word(1)(abs),
+    'mod': word(2)(operator.mod),
+    'pow': word(2)(pow),
+    'powmod': word(3)(pow),
+    'floor': word(1)(math.floor),
+    'ceil': word(1)(math.ceil),
+    'min': word(2)(min),
+    'max': word(2)(max),
+    'sqrt': word(1)(math.sqrt),
+    '.': word(1)(print),
+    '\.': word(1)(functools.partial(print, end='')),
     '.s': Fith_dump_stack,
     'len': Fith_len,
     'cmp': Fith_cmp,
-    'not': Fith_not,
-    'and': Fith_and,
-    'or': Fith_or,
-    '@': Fith_get,
+    'not': word(1)(operator.not_),
+    'and': word(2)(operator.and_),
+    'or': word(2)(operator.or_),
+    'get': Fith_get,
+    'set': Fith_set,
+    'del': Fith_del,
     'append': Fith_append,
     'prepend': Fith_prepend,
     'slice': Fith_slice,
@@ -261,9 +227,15 @@ Fith_primitives = {
     'read': Fith_read,
     '>int': Fith_castgen(int),
     '>float': Fith_castgen(float),
+    '>str': Fith_castgen(str),
+    '>list': Fith_cast_list,
+    'int?': Fith_typecheckgen(int),
+    'float?': Fith_typecheckgen(float),
+    'str?': Fith_typecheckgen(str),
+    'list?': Fith_typecheckgen(fithtypes.FithList),
     '#t':fithtypes.FithBool(True),
     '#f':fithtypes.FithBool(False),
-    '#null': fithtypes.FithNull,
+    '_': fithtypes.FithNull(),
 }
 
 Fith_metawords = {

@@ -1,5 +1,4 @@
 {
     "*math*": "lib/math.5th",
-    "*builtins*": "lib/builtins.5th",
-    "*functional*": "lib/functional.5th"
+    "*builtins*": "lib/builtins.5th"
 }

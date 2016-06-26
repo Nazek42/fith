@@ -1,6 +1,25 @@
+## Some additional stack primitives
 : -rot ( a b c -- c a b ) rot rot ;
 : nip ( a b -- b ) swap drop ;
 : tuck ( a b -- b a b ) swap over ;
+: sheep ( a b -- b a a ) swap dup ;
+: dup2 ( a b -- a b a b ) over over ;
+
+## The save-restore system, equivalent to >r/r> in Forth
+[ ] -> *saved*
+: save ( x y -- x ) *saved* swap append -> *saved* ;
+: restore ( -- saved ) *saved* dup last swap -> *saved* ;
+: save2 ( x y -- ) save save ;
+: restore2 ( -- x y ) restore restore ;
+
+## Dip and keep combinators, straight outta Factor
+: dip ( x y f -- x f~ y ) swap save ~ restore ;
+: dip2 ( x y z f -- x f~ y z ) -rot save2 ~ restore2 ;
+: keep ( x f -- x f~ x ) over save ~ restore ;
+: keep2 ( x y f -- x y f~ x y ) pick pick save2 ~ restore2 ;
+
+## A more complicated stack primitive, requiring dip to implement nicely
+: pick ( x y z -- x y z x ) rot dup { -rot } dip ;
 
 : =? ( a b -- a=b ) cmp not ;
 : >? ( a b -- a>b ) cmp 1 =? ;
@@ -11,73 +30,104 @@
 
 : >bool ( a -- bool ) not not ;
 
-: 1+ ( x -- x+1 ) 1 + ;
-: 1- ( x -- x-1 ) 1 - ;
-: 2+ ( x -- x+2 ) 2 + ;
-: 2- ( x -- x-2 ) 2 - ;
+: 1+ ( n -- n+1 ) 1 + ;
+: 1- ( n -- n-1 ) 1 - ;
+: 2+ ( n -- n+2 ) 2 + ;
+: 2- ( n -- n-2 ) 2 - ;
 
-: map ( list transformation -- transformed-list )
+: map ( L f -- [L1f~,L2f~,L3f~..] )
     [ ] -> %mapresult%
-    over len -> %length%
+    -> %mapfunc%
+    -> %maplist%
+    %maplist% len -> %length%
     0 -> %i%
-    %i% %length% <? {
-        over %i% @ over ~
-        %mapresult% swap append drop
+    { %i% %length% <? } {
+        %maplist% %i% get %mapfunc% ~
+        %mapresult% swap append -> %mapresult%
         %i% 1+ -> %i%
-        %i% %length% <?
     } while
-    drop drop %mapresult%
+    %mapresult%
 ;
 
-: for ( list block -- )
-    over len -> %length%
+: for ( L f -- )
+    -> %forfunc%
+    -> %forlist%
+    %forlist% len -> %length%
     0 -> %i%
-    %i% %length% <? {
-        over %i% @ over ~
+    { %i% %length% <? } {
+        %forlist% %i% get %forfunc% ~
         %i% 1+ -> %i%
-        %i% %length% <?
     } while
-    drop drop
 ;
 
-: dotimes ( func num -- )
+: dotimes ( f n -- )
     0 -> %i% -> %dotimes%
     -> %dtfunc%
-    %i% %dotimes% <? {
+    { %i% %dotimes% <? } {
         %dtfunc% ~
         %i% 1+ -> %i%
-        %i% %dotimes% <?
     } while
 ;
 
-: foldr ( [x1,x2,x3...xn] func -- folded )
+## Right fold.
+: foldr ( L f -- Ln`f`Ln-1`f`..L1 )
     -> func
-    dup len 1 - -> num
+    dup len 1- -> num
     dump func num dotimes
 ;
 
-: filter ( list pred -- filtered )
+## Left fold.
+: foldl ( L f -- L1`f`L2`f`..Ln ) { reverse } dip foldr ;
 
-;
-
-: range ( a b -- [a,a+1...b-2,b-1] )
+## Range from a to b. Includes a but not b.
+: range ( a b -- [a,b) )
     -> %b% -> %a%
     [ ]
-    %a% %b% <? {
+    { %a% %b% <? } {
         %a% append
         %a% 1+ -> %a%
-        %a% %b% <?
     } while
 ;
 
+## Totally exclusive and inclusive ranges.
 : exc-range ( a b -- [a+1,a+2...b-2,b-1] ) swap 1+ swap range ;
 : inc-range ( a b -- [a,a+1...b-1,b] ) 1+ range ;
+
+## Range from 0 to n - this takes a single argument as opposed to `range`'s 2.
+: iota ( n -- [0,n) ) 0 swap range ;
 
 : sum ( [x1,x2..xn] -- x1+x2+..+xn ) { + } foldr ;
 : product ( [x1,x2..xn] -- x1*x2*..*xn ) { * } foldr ;
 
+: divisible? ( a b -- #t/#f ) mod 0 =? ;
+: even? ( n -- #t/#f ) 2 divisible? ;
+: odd? ( n -- #t/#f ) even? not ;
+
 : []>bool ( [x1,x2..xn] -- [x1>bool,f2>bool..fn>bool] ) { >bool } map ;
-: all ( [f1,f2..fn] -- f1&&f2&&..&&fn ) []>bool { and } foldr ;
-: any ( [f1,f2..fn] -- f1||f2||..||fn ) []>bool { or } foldr ;
+: all ( [f1,f2..fn] -- f1&&f2&&..&&fn ) { and } foldr ;
+: any ( [f1,f2..fn] -- f1||f2||..||fn ) { or } foldr ;
 
 : prompt ( prompt-str -- input ) \. line ;
+
+: head ( list -- list[0] ) 0 get ;
+: tail ( list -- list[1:] ) [ 1 _ ] slice ;
+: init ( list -- list[:-1] ) [ -1 ] slice ;
+: last ( list -- list[-1] ) -1 get ;
+
+: []min ( list -- min ) { min } foldr ;
+: []max ( list -- max ) { max } foldr ;
+
+: reverse ( [a,b,c] -- [c,b,a] ) [ _ _ -1 ] slice ;
+: wrap ( .. c d n -- [a,b,c,d] ) [ ] { swap prepend } rot dotimes ;
+: extend ( L1 L2 -- L1:L2 ) { append } for ;
+
+: compose ( f g -- fg ) -> %composeg% -> %composef%
+    [ %composef% dump %composeg% dump ]
+;
+
+: []compose ( [f,g,h..] -- fgh.. ) { compose } foldr ;
+
+: tern ( a b cond -- cond?a:b ) { drop } { nip } branch ;
+
+: bi ( x f g -- f(x) g(x) ) { over } dip { ~ } dip2 ~ ;
+: bi@ ( x y f -- f(x) f(y) ) dup { dip } dip ~ ;
