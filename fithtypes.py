@@ -8,8 +8,8 @@ class FithVar:
         stack.push(self._value)
 
 class Stack:
-    def __init__(self):
-        self._list = []
+    def __init__(self, start=None):
+        self._list = start or []
         self._locals = {}
 
     def peek(self):

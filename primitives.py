@@ -61,6 +61,11 @@ def Fith_slice(stack):
     L = stack.peek()._list
     L[:] = [L[i] for i in range(*slice(*sl).indices(len(L)))]
 
+@word(1)
+def Fith_transpose(L):
+    outlist = [fithtypes.FithList(subl) for subl in list(zip(*L._list))]
+    return fithtypes.FithList(outlist)
+
 def Fith_dump(stack):
     L = stack.pop()
     stack._list += L
@@ -213,6 +218,9 @@ Fith_primitives = {
     'append': Fith_append,
     'prepend': Fith_prepend,
     'slice': Fith_slice,
+    'transpose': Fith_transpose,
+    'ord': word(1)(ord),
+    'chr': word(1)(chr),
     'dump': Fith_dump,
     'dup': Fith_dup,
     'drop': Fith_drop,

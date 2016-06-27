@@ -1,9 +1,9 @@
 ## Some additional stack primitives
-: -rot ( a b c -- c a b ) rot rot ;
-: nip ( a b -- b ) swap drop ;
-: tuck ( a b -- b a b ) swap over ;
+: -rot ( x y z -- z x y ) rot rot ;
+: nip ( x y -- y ) swap drop ;
+: tuck ( x y -- y x y ) swap over ;
 : sheep ( a b -- b a a ) swap dup ;
-: dup2 ( a b -- a b a b ) over over ;
+: dup2 ( x y -- x y x y ) over over ;
 
 ## The save-restore system, equivalent to >r/r> in Forth
 [ ] -> *saved*
@@ -113,6 +113,8 @@
 : tail ( list -- list[1:] ) [ 1 _ ] slice ;
 : init ( list -- list[:-1] ) [ -1 ] slice ;
 : last ( list -- list[-1] ) -1 get ;
+
+: zip ( L1 L2 -- zipped ) 2 wrap transpose ;
 
 : []min ( list -- min ) { min } foldr ;
 : []max ( list -- max ) { max } foldr ;
