@@ -104,8 +104,8 @@
 : odd? ( n -- #t/#f ) even? not ;
 
 : []>bool ( [x1,x2..xn] -- [x1>bool,f2>bool..fn>bool] ) { >bool } map ;
-: all ( [f1,f2..fn] -- f1&&f2&&..&&fn ) { and } foldr ;
-: any ( [f1,f2..fn] -- f1||f2||..||fn ) { or } foldr ;
+: all ( [f1,f2..fn] -- f1&&f2&&..&&fn ) { and } foldr >bool ;
+: any ( [f1,f2..fn] -- f1||f2||..||fn ) { or } foldr >bool ;
 
 : prompt ( prompt-str -- input ) \. line ;
 

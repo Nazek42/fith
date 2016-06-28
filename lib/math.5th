@@ -1,13 +1,11 @@
 : factorial ( x -- x! ) 2 swap inc-range product ;
 
-: prime? ( x -- prime-or-not ) -> x
-    2 x sqrt ceil inc-range
-    { x swap mod } map all
+: prime? ( x -- prime-or-not )
+    2 over sqrt ceil inc-range
+    { over swap mod } map all
 ;
 
 : gcd ( a b -- gcd(a,b) ) { dup } { tuck mod } while drop abs ;
 
-: totient ( x -- phi(x) ) -> x
-    1 x inc-range
-    { x gcd 1 =? } map sum
-;
+: coprime? ( a b -- t/f ) gcd 1 =? ;
+: totient ( n -- tot ) dup 1 swap range { pick coprime? } filter len ;
