@@ -12,7 +12,7 @@ def parse(raw, name=''):
     for i in range(offset, len(raw), 2):
         placeholder = '\x02' + name + str(i)
         string = parse_escapes(raw[i])
-        strings[placeholder] = fithtypes.FithVar(string)
+        strings[placeholder] = fithtypes.FithObj(string)
         raw[i] = placeholder
     return itertools.chain.from_iterable(s.split() for s in raw), strings
 
@@ -59,4 +59,5 @@ def parse_escapes(string):
 
 def remove_comments(code):
     no_comments = re.sub(r"##.*$", ' ', code, flags=re.MULTILINE)
+    no_comments = re.sub(r"\s\([^)]*\)\s", ' ', no_comments, flags=re.MULTILINE)
     return re.sub(r" {2,}", ' ', no_comments.replace('\n', ' '))
