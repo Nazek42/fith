@@ -32,6 +32,7 @@ def FithExec(metastack, words):
                 #print("Encountered }, lambda_counter:",lambda_counter)
                 if lambda_counter > 0:
                     lambda_counter -= 1
+                    stack.push(word)
                 else:
                     Fith_close_lambda(metastack)
             elif word == ';' and isinstance(stack, fithtypes.NamedFunc):

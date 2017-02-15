@@ -93,8 +93,9 @@
 : exc-range ( a b -- [a+1,a+2...b-2,b-1] ) swap 1+ swap range ;
 : inc-range ( a b -- [a,a+1...b-1,b] ) 1+ range ;
 
-## Range from 0 to n - this takes a single argument as opposed to `range`'s 2.
-: iota ( n -- [0,n) ) 0 swap range ;
+## Ranges from 0/1 to n - this takes a single argument as opposed to `range`'s 2.
+: 0upto ( n -- [0,n) ) 0 swap range ;
+: 1upto ( n -- [1,n) ) 1 swap range ;
 
 : sum ( [x1,x2..xn] -- x1+x2+..+xn ) { + } foldr ;
 : product ( [x1,x2..xn] -- x1*x2*..*xn ) { * } foldr ;
@@ -104,8 +105,8 @@
 : odd? ( n -- #t/#f ) even? not ;
 
 : []>bool ( [x1,x2..xn] -- [x1>bool,f2>bool..fn>bool] ) { >bool } map ;
-: all ( [f1,f2..fn] -- f1&&f2&&..&&fn ) { and } foldr >bool ;
 : any ( [f1,f2..fn] -- f1||f2||..||fn ) { or } foldr >bool ;
+: all ( list -- t/f ) { not } map any not ;
 
 : prompt ( prompt-str -- input ) \. line ;
 
